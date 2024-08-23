@@ -1,4 +1,4 @@
-管理号：   // For admin
+管理号(Custom your keyword)：   // For admin
 966597997372
 966571325845
 966575116893
@@ -6,7 +6,7 @@
 
 
 
-水军：     // For navy
+水军(Custom your keyword)：     // For navy
 966592447322
 966592494311
 201143732686
@@ -16,7 +16,7 @@
 
 
 
-客户；     // For member
+客户(Custom your keyword)；     // For member
 966555060000
 966554005945
 966501286152

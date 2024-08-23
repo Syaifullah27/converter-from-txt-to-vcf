@@ -80,10 +80,10 @@ function App() {
     return (
         <div className="border-2 border-[#dedede] p-4">
             <div className="p-2">
-                    <h1 className='font-bold text-xl pb-5 text-center'>Only Number</h1>
+                    <h1 className='font-bold text-xl pb-4 text-center'>Only Number</h1>
                     <button
                         onClick={show ? handleClose : handleShow}
-                        className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md"
+                        className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md pb-2"
                     >
                         {show ? 'Example File' : 'Example File'}
                     </button>

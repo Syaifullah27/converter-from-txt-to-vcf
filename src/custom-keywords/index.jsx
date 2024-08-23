@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import ModalBox from '../ModalBOX';
 import axios from 'axios';
 
-function AdminNavyMember() {
+function CustomKeywords() {
     const [fileContent, setFileContent] = useState('');
     const [adminName, setAdminName] = useState('admin');
     const [navyName, setNavyName] = useState('navy');
@@ -11,6 +11,9 @@ function AdminNavyMember() {
     const [memberFileName, setMemberFileName] = useState('Member.vcf');
     const [show, setShow] = useState(false);
     const [fileExample, setFileExample] = useState('');
+    const [adminKeyword, setAdminKeyword] = useState('管理号');
+    const [navyKeyword, setNavyKeyword] = useState('水军');
+    const [memberKeyword, setMemberKeyword] = useState('客户');
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -27,7 +30,7 @@ function AdminNavyMember() {
     };
 
     useEffect(() => {
-        axios.get('/src/ExampleFile/admin-navy-member.txt', { responseType: 'text' })
+        axios.get('/src/ExampleFile/custom-keyword.txt', { responseType: 'text' })
             .then((response) => {
                 setFileExample(response.data);
             })
@@ -47,15 +50,15 @@ function AdminNavyMember() {
         let contactNumberMember = 1;
 
         lines.forEach((line) => {
-            if (line.includes('管理号')) {
+            if (line.includes(adminKeyword)) {
                 contactType = adminName;
-            } else if (line.includes('水军')) {
+            } else if (line.includes(navyKeyword)) {
                 contactType = navyName;
-            } else if (line.includes('客户')) {
+            } else if (line.includes(memberKeyword)) {
                 contactType = memberName;
             }
 
-            if (!line.includes('管理号') && !line.includes('水军') && !line.includes('客户')) {
+            if (!line.includes(adminKeyword) && !line.includes(navyKeyword) && !line.includes(memberKeyword)) {
                 const contactNumber = contactType === adminName ? contactNumberAdmin++ : contactType === navyName ? contactNumberNavy++ : contactNumberMember++;
                 const vcfEntry = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactType} ${contactNumber}\nTEL:${line.trim()}\nEND:VCARD\n`;
                 if (contactType === memberName) {
@@ -93,7 +96,7 @@ function AdminNavyMember() {
         <div>
             <div className="p-2 border-2 border-[#dedede] w-max">
                 <div className="p-2">
-                    <h1 className='font-bold text-xl pb-4 text-center'>Admin and Navy contacts combined in one file, separate from Members</h1>
+                    <h1 className='font-bold text-xl pb-4 text-center'>Custom Keywords</h1>
                     <button
                         onClick={show ? handleClose : handleShow}
                         className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md"
@@ -105,7 +108,40 @@ function AdminNavyMember() {
                 </div>
 
                 <div className="mt-4">
-                    <div className="flex gap-4">
+                <div className="flex gap-4 py-4">
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">Admin Keyword</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter Admin keyword"
+                                value={adminKeyword}
+                                onChange={(e) => setAdminKeyword(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">Navy Keyword</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter Navy keyword"
+                                value={navyKeyword}
+                                onChange={(e) => setNavyKeyword(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">Member Keyword</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter Member keyword"
+                                value={memberKeyword}
+                                onChange={(e) => setMemberKeyword(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-4 py-2">
+                        
                         <div className="flex flex-col gap-2">
                             <h3 className="font-medium">Admin Contact Name</h3>
                             <input
@@ -137,12 +173,13 @@ function AdminNavyMember() {
                             />
                         </div>
                     </div>
+                
                 </div>
 
                 <div className="mt-4">
                     <div className="flex gap-4">
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Member Name Contacts</h3>
+                            <h3 className="font-medium">Member Contact Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Member contact name"
@@ -161,6 +198,7 @@ function AdminNavyMember() {
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
                             />
                         </div>
+                      
                     </div>
                 </div>
 
@@ -185,4 +223,4 @@ function AdminNavyMember() {
     );
 }
 
-export default AdminNavyMember;
+export default CustomKeywords;

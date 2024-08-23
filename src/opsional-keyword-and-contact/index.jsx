@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react';
 import ModalBox from '../ModalBOX';
 import axios from 'axios';
 
-function AdminNavyMember() {
+function CustomKeywords() {
     const [fileContent, setFileContent] = useState('');
-    const [adminName, setAdminName] = useState('admin');
-    const [navyName, setNavyName] = useState('navy');
-    const [memberName, setMemberName] = useState('member');
+    const [adminName, setAdminName] = useState('Admin'); // Default value for Admin name
+    const [navyName, setNavyName] = useState('Navy'); // Default value for Navy name
+    const [memberName, setMemberName] = useState('Member'); // Default value for Member name
     const [adminNavyFileName, setAdminNavyFileName] = useState('AdminNavy.vcf');
     const [memberFileName, setMemberFileName] = useState('Member.vcf');
     const [show, setShow] = useState(false);
     const [fileExample, setFileExample] = useState('');
+    const [adminKeyword, setAdminKeyword] = useState('');
+    const [navyKeyword, setNavyKeyword] = useState('');
+    const [memberKeyword, setMemberKeyword] = useState('');
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -27,7 +30,7 @@ function AdminNavyMember() {
     };
 
     useEffect(() => {
-        axios.get('/src/ExampleFile/admin-navy-member.txt', { responseType: 'text' })
+        axios.get('/src/ExampleFile/opsional-contact-keyword.txt', { responseType: 'text' })
             .then((response) => {
                 setFileExample(response.data);
             })
@@ -47,18 +50,23 @@ function AdminNavyMember() {
         let contactNumberMember = 1;
 
         lines.forEach((line) => {
-            if (line.includes('管理号')) {
-                contactType = adminName;
-            } else if (line.includes('水军')) {
-                contactType = navyName;
-            } else if (line.includes('客户')) {
-                contactType = memberName;
+            if (adminKeyword && line.includes(adminKeyword)) {
+                contactType = adminName || 'Admin';
+            } else if (navyKeyword && line.includes(navyKeyword)) {
+                contactType = navyName || 'Navy';
+            } else if (memberKeyword && line.includes(memberKeyword)) {
+                contactType = memberName || 'Member';
             }
 
-            if (!line.includes('管理号') && !line.includes('水军') && !line.includes('客户')) {
-                const contactNumber = contactType === adminName ? contactNumberAdmin++ : contactType === navyName ? contactNumberNavy++ : contactNumberMember++;
+            if (!line.includes(adminKeyword) && !line.includes(navyKeyword) && !line.includes(memberKeyword)) {
+                const contactNumber = contactType === (adminName || 'Admin') 
+                    ? contactNumberAdmin++ 
+                    : contactType === (navyName || 'Navy') 
+                    ? contactNumberNavy++ 
+                    : contactNumberMember++;
+                    
                 const vcfEntry = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactType} ${contactNumber}\nTEL:${line.trim()}\nEND:VCARD\n`;
-                if (contactType === memberName) {
+                if (contactType === (memberName || 'Member')) {
                     vcfContentMember += vcfEntry;
                 } else {
                     vcfContentAdminNavy += vcfEntry;
@@ -81,11 +89,16 @@ function AdminNavyMember() {
 
     const handleConvertAndDownload = () => {
         const { vcfContentAdminNavy, vcfContentMember } = convertToVcf(fileContent || fileExample);
-        if (vcfContentAdminNavy) {
-            handleDownload(vcfContentAdminNavy, adminNavyFileName);
-        }
-        if (vcfContentMember) {
-            handleDownload(vcfContentMember, memberFileName);
+        
+        const isConfirmed = window.confirm("Are you sure the format and input are correct? If so, click OK to continue.");
+        
+        if (isConfirmed) {
+            if (vcfContentAdminNavy) {
+                handleDownload(vcfContentAdminNavy, adminNavyFileName);
+            }
+            if (vcfContentMember) {
+                handleDownload(vcfContentMember, memberFileName);
+            }
         }
     };
 
@@ -93,7 +106,7 @@ function AdminNavyMember() {
         <div>
             <div className="p-2 border-2 border-[#dedede] w-max">
                 <div className="p-2">
-                    <h1 className='font-bold text-xl pb-4 text-center'>Admin and Navy contacts combined in one file, separate from Members</h1>
+                    <h1 className='font-bold text-xl pb-4 text-center'>Opsional Keyword and Contact</h1>
                     <button
                         onClick={show ? handleClose : handleShow}
                         className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md"
@@ -105,7 +118,40 @@ function AdminNavyMember() {
                 </div>
 
                 <div className="mt-4">
-                    <div className="flex gap-4">
+                <div className="flex gap-4 py-4">
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">Admin Keyword</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter Admin keyword"
+                                value={adminKeyword}
+                                onChange={(e) => setAdminKeyword(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">Navy Keyword</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter Navy keyword"
+                                value={navyKeyword}
+                                onChange={(e) => setNavyKeyword(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">Member Keyword</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter Member keyword"
+                                value={memberKeyword}
+                                onChange={(e) => setMemberKeyword(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-4 py-2">
+                        
                         <div className="flex flex-col gap-2">
                             <h3 className="font-medium">Admin Contact Name</h3>
                             <input
@@ -137,12 +183,13 @@ function AdminNavyMember() {
                             />
                         </div>
                     </div>
+                
                 </div>
 
                 <div className="mt-4">
                     <div className="flex gap-4">
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Member Name Contacts</h3>
+                            <h3 className="font-medium">Member Contact Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Member contact name"
@@ -161,6 +208,7 @@ function AdminNavyMember() {
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
                             />
                         </div>
+                      
                     </div>
                 </div>
 
@@ -185,4 +233,4 @@ function AdminNavyMember() {
     );
 }
 
-export default AdminNavyMember;
+export default CustomKeywords;
