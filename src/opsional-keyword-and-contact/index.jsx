@@ -50,8 +50,13 @@ function CustomKeywords() {
         let contactNumberAdmin = 1;
         let contactNumberNavy = 1;
         let contactNumberMember = 1;
-
+    
         lines.forEach((line) => {
+            // Jika ada 'AAA' di dalam nomor, hapus 'AAA' tersebut
+            if (line.includes('AAA')) {
+                line = line.replace('AAA', '').trim();
+            }
+    
             if (adminKeyword && line.includes(adminKeyword)) {
                 currentContactType = adminName || 'Admin';
                 return; 
@@ -62,11 +67,11 @@ function CustomKeywords() {
                 currentContactType = memberName || 'Member';
                 return; 
             } 
-
+    
             if (currentContactType) {
                 let contactNumber;
                 let contactName;
-
+    
                 if (currentContactType === (adminName || 'Admin')) {
                     contactNumber = contactNumberAdmin++;
                     contactName = `${adminName} ${contactNumber}`;
@@ -77,9 +82,9 @@ function CustomKeywords() {
                     contactNumber = contactNumberMember++;
                     contactName = `${memberName} ${contactNumber}`;
                 }
-
+    
                 const vcfEntry = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactName}\nTEL:${line.trim()}\nEND:VCARD\n`;
-
+    
                 if (currentContactType === (memberName || 'Member')) {
                     vcfContentMember += vcfEntry;
                 } else {
@@ -87,7 +92,7 @@ function CustomKeywords() {
                 }
             }
         });
-
+    
         return { vcfContentAdminNavy, vcfContentMember };
     };
 
