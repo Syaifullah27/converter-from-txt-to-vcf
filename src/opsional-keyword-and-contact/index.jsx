@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import ModalBox from '../ModalBOX';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import ModalBox from '../ModalBOX';
 
 function CustomKeywords() {
     const [fileContent, setFileContent] = useState('');
-    const [adminName, setAdminName] = useState('Admin'); // Default value for Admin name
-    const [navyName, setNavyName] = useState('Navy'); // Default value for Navy name
-    const [memberName, setMemberName] = useState('Member'); // Default value for Member name
+    const [fileName, setFileName] = useState(''); // State untuk menyimpan nama file
+    const [adminName, setAdminName] = useState('Admin');
+    const [navyName, setNavyName] = useState('Navy');
+    const [memberName, setMemberName] = useState('Member');
     const [adminNavyFileName, setAdminNavyFileName] = useState('AdminNavy.vcf');
     const [memberFileName, setMemberFileName] = useState('Member.vcf');
     const [show, setShow] = useState(false);
@@ -21,6 +22,7 @@ function CustomKeywords() {
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setFileName(file.name); // Simpan nama file ke state
             const reader = new FileReader();
             reader.onload = (event) => {
                 setFileContent(event.target.result);
@@ -44,29 +46,41 @@ function CustomKeywords() {
         const lines = content.split('\n').filter(line => line.trim() !== '');
         let vcfContentAdminNavy = '';
         let vcfContentMember = '';
-        let contactType = '';
+        let currentContactType = ''; 
         let contactNumberAdmin = 1;
         let contactNumberNavy = 1;
         let contactNumberMember = 1;
 
         lines.forEach((line) => {
             if (adminKeyword && line.includes(adminKeyword)) {
-                contactType = adminName || 'Admin';
+                currentContactType = adminName || 'Admin';
+                return; 
             } else if (navyKeyword && line.includes(navyKeyword)) {
-                contactType = navyName || 'Navy';
+                currentContactType = navyName || 'Navy';
+                return; 
             } else if (memberKeyword && line.includes(memberKeyword)) {
-                contactType = memberName || 'Member';
-            }
+                currentContactType = memberName || 'Member';
+                return; 
+            } 
 
-            if (!line.includes(adminKeyword) && !line.includes(navyKeyword) && !line.includes(memberKeyword)) {
-                const contactNumber = contactType === (adminName || 'Admin') 
-                    ? contactNumberAdmin++ 
-                    : contactType === (navyName || 'Navy') 
-                    ? contactNumberNavy++ 
-                    : contactNumberMember++;
-                    
-                const vcfEntry = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactType} ${contactNumber}\nTEL:${line.trim()}\nEND:VCARD\n`;
-                if (contactType === (memberName || 'Member')) {
+            if (currentContactType) {
+                let contactNumber;
+                let contactName;
+
+                if (currentContactType === (adminName || 'Admin')) {
+                    contactNumber = contactNumberAdmin++;
+                    contactName = `${adminName} ${contactNumber}`;
+                } else if (currentContactType === (navyName || 'Navy')) {
+                    contactNumber = contactNumberNavy++;
+                    contactName = `${navyName} ${contactNumber}`;
+                } else if (currentContactType === (memberName || 'Member')) {
+                    contactNumber = contactNumberMember++;
+                    contactName = `${memberName} ${contactNumber}`;
+                }
+
+                const vcfEntry = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactName}\nTEL:${line.trim()}\nEND:VCARD\n`;
+
+                if (currentContactType === (memberName || 'Member')) {
                     vcfContentMember += vcfEntry;
                 } else {
                     vcfContentAdminNavy += vcfEntry;
@@ -78,11 +92,12 @@ function CustomKeywords() {
     };
 
     const handleDownload = (content, fileName) => {
+        const finalFileName = fileName || 'defaultMemberFile.vcf'; 
         const blob = new Blob([content], { type: 'text/vcard' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = fileName;
+        link.download = finalFileName;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -96,7 +111,7 @@ function CustomKeywords() {
             if (vcfContentAdminNavy) {
                 handleDownload(vcfContentAdminNavy, adminNavyFileName);
             }
-            if (vcfContentMember) {
+            if (vcfContentMember && memberKeyword) {
                 handleDownload(vcfContentMember, memberFileName);
             }
         }
@@ -208,26 +223,38 @@ function CustomKeywords() {
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
                             />
                         </div>
-                      
                     </div>
                 </div>
-
-                <div className="mt-4 p-2 flex gap-4 flex-col max-w-[420px]">
+                <div className="mt-4 flex gap-4">
+                    <label
+                        htmlFor="file-upload"
+                        className="bg-blue-500 text-[#f5f5f5] p-2 rounded-md cursor-pointer"
+                    >
+                        Choose File
+                    </label>
                     <input
+                        id="file-upload"
                         type="file"
                         accept=".txt"
                         onChange={handleFileUpload}
-                        className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                        style={{ display: 'none' }}
                     />
-                    {fileContent && (
-                        <button
-                            className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md"
-                            onClick={handleConvertAndDownload}
-                        >
-                            Download as VCF
-                        </button>
-                    )}
+                    <span className="text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md">
+                    {fileName ? ` ${fileName}` : 'No file selected'}
+                    </span>
                 </div>
+
+                {/* Hanya tampilkan tombol download jika fileName tidak kosong */}
+                {fileName && (
+                    <div className="mt-4">
+                        <button
+                            onClick={handleConvertAndDownload}
+                            className="bg-green-500 text-[#f5f5f5] p-2 px-4 rounded-md"
+                        >
+                            Convert and Download VCF
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

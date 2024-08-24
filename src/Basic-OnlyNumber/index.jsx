@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ModalBox from '../ModalBOX';
 
-function App() {
+function OnlyNumberWithAAA() {
     const [fileContent, setFileContent] = useState('');
     const [contactName, setContactName] = useState('contact');
     const [fileName, setFileName] = useState('file.vcf');
@@ -122,4 +122,4 @@ function App() {
     );
 }
 
-export default App;
+export default OnlyNumberWithAAA;

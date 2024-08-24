@@ -6,6 +6,8 @@ import OnlyNumber from './Basic-OnlyNumber';
 import Navbar from './components/Navbar';
 import CustomKeywords from './custom-keywords';
 import OpsionalKeywordAndContact from './opsional-keyword-and-contact';
+import OnlyNumberWithAAA from './onlyNumber-with-AAA';
+
 
 const App = () => {
   return (
@@ -15,6 +17,7 @@ const App = () => {
         <AdminNavyMember />
         <OnlyNumber />
         <CustomKeywords />
+        <OnlyNumberWithAAA />
         <OpsionalKeywordAndContact />
       </div>
     </>
