@@ -93,7 +93,7 @@ function App({ isDarkMode }) {
 
     return (
         <div className="border-2 border-[#dedede] rounded-lg p-4 h-max">
-            <div className="p-2">
+            <div className="pb-3">
                 <h1 className={`font-bold text-xl pb-4 text-center ${isDarkMode ? 'text-white' : ''}`}>Only Number with AAA</h1>
                 <button
                     onClick={show ? handleClose : handleShow}

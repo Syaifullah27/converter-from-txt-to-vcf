@@ -17,9 +17,10 @@ const Navbar = ({isDarkMode, setIsDarkMode}) => {
     return (
         <div className={`p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-slate-900'}`}>
             <div className="flex justify-between items-center px-4">
-                <h1 className="text-center text-3xl font-bold text-white">
-                    TXT to VCF Converter
-                </h1>
+                <img src="logo.png" alt="" width={250}/>
+                {/* <h1 className="text-center text-3xl font-bold text-white">
+                EsyehaX Converter
+                </h1> */}
                 <Switch
                     checked={isDarkMode}
                     onChange={toggleDarkMode}
