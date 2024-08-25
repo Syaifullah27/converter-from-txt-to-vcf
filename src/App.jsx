@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React from 'react'
+import React, { useState } from 'react'
 import './App.css';
 import AdminNavyMember from './ADMIN-NAVY(1file)-MEMBER(1file)'
 import OnlyNumber from './Basic-OnlyNumber';
@@ -10,17 +10,18 @@ import OnlyNumberWithAAA from './onlyNumber-with-AAA';
 
 
 const App = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   return (
-    <>
-      <Navbar />
+    <div className={`App ${isDarkMode ? 'bg-black' : ''}`}>
+      <Navbar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}/>
       <div className='flex gap-4 max-sm:flex-col flex-wrap p-5'>
         {/* <AdminNavyMember /> */}
         {/* <OnlyNumber /> */}
         {/* <CustomKeywords /> */}
-        <OpsionalKeywordAndContact />
-        <OnlyNumberWithAAA />
+        <OpsionalKeywordAndContact isDarkMode={isDarkMode}/>
+        <OnlyNumberWithAAA isDarkMode={isDarkMode}/>
       </div>
-    </>
+    </div>
   )
 }
 

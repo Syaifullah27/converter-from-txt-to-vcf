@@ -2,7 +2,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ModalBox from '../ModalBOX';
 
-function App() {
+// eslint-disable-next-line react/prop-types
+function App({ isDarkMode }) {
     const [fileContent, setFileContent] = useState('');
     const [contactName, setContactName] = useState('contact');
     const [fileName, setFileName] = useState('file.vcf');
@@ -91,21 +92,21 @@ function App() {
     }, []);
 
     return (
-        <div className="border-2 border-[#dedede] p-4 h-max">
+        <div className="border-2 border-[#dedede] rounded-lg p-4 h-max">
             <div className="p-2">
-                <h1 className='font-bold text-xl pb-4 text-center'>Only Number with AAA</h1>
+                <h1 className={`font-bold text-xl pb-4 text-center ${isDarkMode ? 'text-white' : ''}`}>Only Number with AAA</h1>
                 <button
                     onClick={show ? handleClose : handleShow}
                     className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md pb-2"
                 >
                     {show ? 'Example File' : 'Example File'}
                 </button>
-                <p className="text-sm italic text-blue-800">*Click the button to open file Example.</p>
+                <p className="text-sm italic text-blue-800 pt-1">*Click the button to open file Example.</p>
                 <ModalBox show={show} handleClose={handleClose} fileContent={fileExample} />
             </div>
             <div className='flex flex-col gap-4'>
                 <div className='flex flex-col gap-2'>
-                    <label className='font-medium'>
+                    <label className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>
                         Contact Name
                     </label>
                     <input type="text" value={contactName} onChange={handleContactNameChange}
@@ -113,7 +114,7 @@ function App() {
                         className='border border-[#dedede] p-2 rounded-md placeholder:text-sm' />
                 </div>
                 <div className='flex flex-col gap-2'>
-                    <label className='font-medium'>
+                    <label className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>
                         File Name
                     </label>
                     <input type="text" value={fileName} onChange={handleFileNameChange}
@@ -121,8 +122,8 @@ function App() {
                         className='border border-[#dedede] p-2 rounded-md placeholder:text-sm' />
                 </div>
             </div>
-            <div className='flex flex-col gap-4 pt-5'>
-                <div className="flex items-center gap-2">
+            <div className='flex flex-col gap-4 pt-7'>
+                <div className="flex items-center justify-between">
                     <input
                         type="file"
                         accept=".txt"
@@ -136,13 +137,13 @@ function App() {
                     >
                         Choose File
                     </label>
-                    <span className="text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md">
+                    <span className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md ${isDarkMode ? 'text-gray-200' : ''}`}>
                         {selectedFileName ? ` ${selectedFileName}` : 'No file selected'}
                     </span>
                 </div>
                 {fileContent && (
                     <button
-                        className="bg-green-500 text-white p-2 px-4 rounded-md"
+                        className="bg-green-500 font-medium text-white p-2 px-4 rounded-md"
                         onClick={handleDownload}>
                         Convert and Download VCF
                     </button>

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ModalBox from '../ModalBOX';
 
-function CustomKeywords() {
+// eslint-disable-next-line react/prop-types
+function CustomKeywords({ isDarkMode }) {
     const [fileContent, setFileContent] = useState('');
     const [fileName, setFileName] = useState(''); // State untuk menyimpan nama file
     const [adminName, setAdminName] = useState('Admin');
@@ -146,23 +148,23 @@ function CustomKeywords() {
 
     return (
         <div>
-            <div className="p-2 border-2 border-[#dedede] w-max">
+            <div className="p-4 border-2 border-[#dedede] rounded-lg w-max">
                 <div className="p-2">
-                    <h1 className='font-bold text-xl pb-4 text-center'>Opsional Keyword and Contact</h1>
+                    <h1 className={`font-bold text-xl pb-4 text-center ${isDarkMode ? 'text-white' : ''}`}>Opsional Keyword and Contact</h1>
                     <button
                         onClick={show ? handleClose : handleShow}
                         className="bg-blue-500 text-[#f5f5f5] p-2 px-2 rounded-md"
                     >
                         {show ? 'Example File' : 'Example File'}
                     </button>
-                    <p className="text-sm italic text-blue-800">*Click the button to open file Example.</p>
+                    <p className="text-sm italic text-blue-800 pt-1">*Click the button to open file Example.</p>
                     <ModalBox show={show} handleClose={handleClose} fileContent={fileExample} />
                 </div>
 
                 <div className="mt-4">
                 <div className="flex gap-4 py-4">
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Admin Keyword</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin Keyword</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Admin keyword"
@@ -172,7 +174,7 @@ function CustomKeywords() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Navy Keyword</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Navy Keyword</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Navy keyword"
@@ -182,7 +184,7 @@ function CustomKeywords() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Member Keyword</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Member Keyword</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Member keyword"
@@ -195,7 +197,7 @@ function CustomKeywords() {
                     <div className="flex gap-4 py-2">
                         
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Admin Contact Name</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin Contact Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Admin contact name"
@@ -205,7 +207,7 @@ function CustomKeywords() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Navy Contact Name</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Navy Contact Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Navy contact name"
@@ -215,7 +217,7 @@ function CustomKeywords() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Admin/Navy File Name</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin/Navy File Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Admin/Navy file name"
@@ -231,7 +233,7 @@ function CustomKeywords() {
                 <div className="mt-4">
                     <div className="flex gap-4">
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Member Contact Name</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Member Contact Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Member contact name"
@@ -241,7 +243,7 @@ function CustomKeywords() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <h3 className="font-medium">Member File Name</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Member File Name</h3>
                             <input
                                 type="text"
                                 placeholder="Enter Member file name"
@@ -252,7 +254,7 @@ function CustomKeywords() {
                         </div>
                     </div>
                 </div>
-                <div className="mt-4 flex gap-4">
+                <div className="mt-4 flex justify-between pt-4">
                     <label
                         htmlFor="file-upload"
                         className="bg-blue-500 text-[#f5f5f5] p-2 rounded-md cursor-pointer"
@@ -266,17 +268,17 @@ function CustomKeywords() {
                         onChange={handleFileUpload}
                         style={{ display: 'none' }}
                     />
-                    <span className="text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md">
+                    <span className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md ${isDarkMode ? 'text-gray-200' : ''}`}>
                     {fileName ? ` ${fileName}` : 'No file selected'}
                     </span>
                 </div>
 
                 {/* Hanya tampilkan tombol download jika fileName tidak kosong */}
                 {fileName && (
-                    <div className="mt-4">
+                    <div className="mt-4 w-full">
                         <button
                             onClick={handleConvertAndDownload}
-                            className="bg-green-500 text-[#f5f5f5] p-2 px-4 rounded-md"
+                            className="bg-green-500 w-full font-medium text-[#f5f5f5] p-2 px-4 rounded-md"
                         >
                             Convert and Download VCF
                         </button>
