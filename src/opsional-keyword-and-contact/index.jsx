@@ -50,13 +50,25 @@ function CustomKeywords() {
         let contactNumberAdmin = 1;
         let contactNumberNavy = 1;
         let contactNumberMember = 1;
-    
+        
+        // Regular expression untuk mendeteksi nomor telepon termasuk yang mengandung tanda '+'
+        const phoneNumberRegex = /^\+?\d+$/;
+        
         lines.forEach((line) => {
+            // Abaikan baris yang tidak mengandung keyword atau nomor telepon
+            if (!phoneNumberRegex.test(line.trim()) && 
+                !line.includes(adminKeyword) && 
+                !line.includes(navyKeyword) && 
+                !line.includes(memberKeyword)) {
+                return;
+            }
+    
             // Jika ada 'AAA' di dalam nomor, hapus 'AAA' tersebut
             if (line.includes('AAA')) {
                 line = line.replace('AAA', '').trim();
             }
     
+            // Tentukan tipe kontak berdasarkan keyword
             if (adminKeyword && line.includes(adminKeyword)) {
                 currentContactType = adminName || 'Admin';
                 return; 
@@ -66,9 +78,10 @@ function CustomKeywords() {
             } else if (memberKeyword && line.includes(memberKeyword)) {
                 currentContactType = memberName || 'Member';
                 return; 
-            } 
+            }
     
-            if (currentContactType) {
+            // Hanya proses nomor telepon yang valid
+            if (phoneNumberRegex.test(line.trim())) {
                 let contactNumber;
                 let contactName;
     
@@ -95,9 +108,18 @@ function CustomKeywords() {
     
         return { vcfContentAdminNavy, vcfContentMember };
     };
+    
+    
 
     const handleDownload = (content, fileName) => {
-        const finalFileName = fileName || 'defaultMemberFile.vcf'; 
+        // Hapus ".vcf" yang berlebihan jika fileName diakhiri dengan ".vcf.vcf"
+        let finalFileName = fileName;
+        if (fileName.endsWith('.vcf.vcf')) {
+            finalFileName = fileName.slice(0, -4); // Hilangkan ".vcf" yang kedua
+        } else if (!fileName.endsWith('.vcf')) {
+            finalFileName = `${fileName}.vcf`; // Tambahkan ".vcf" jika belum ada
+        }
+        
         const blob = new Blob([content], { type: 'text/vcard' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -106,7 +128,7 @@ function CustomKeywords() {
         link.click();
         URL.revokeObjectURL(url);
     };
-
+    
     const handleConvertAndDownload = () => {
         const { vcfContentAdminNavy, vcfContentMember } = convertToVcf(fileContent || fileExample);
         

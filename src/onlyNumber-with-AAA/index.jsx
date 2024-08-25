@@ -13,7 +13,7 @@ function App() {
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setSelectedFileName(file.name); // Set the file name to display
+            setSelectedFileName(file.name);
             const reader = new FileReader();
             reader.onload = (e) => {
                 const filteredContent = e.target.result
@@ -53,8 +53,17 @@ function App() {
         const blob = new Blob([vcfContent], { type: 'text/vcard' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
+
+        // Memastikan nama file tidak memiliki ".vcf" dua kali
+        let downloadFileName = fileName;
+        if (downloadFileName.toLowerCase().endsWith('.vcf.vcf')) {
+            downloadFileName = downloadFileName.slice(0, -4);
+        } else if (!downloadFileName.toLowerCase().endsWith('.vcf')) {
+            downloadFileName += '.vcf';
+        }
+
         link.href = url;
-        link.download = `${fileName}.vcf`; // Nama file diubah sesuai input
+        link.download = downloadFileName;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -87,8 +96,6 @@ function App() {
                 <ModalBox show={show} handleClose={handleClose} fileContent={fileExample} />
             </div>
             <div className='flex flex-col gap-4'>
-
-
                 <div className='flex flex-col gap-2'>
                     <label className='font-medium'>
                         Contact Name
@@ -113,7 +120,7 @@ function App() {
                         accept=".txt"
                         onChange={handleFileChange}
                         id="fileInput"
-                        className="hidden" // Hide the default file input
+                        className="hidden"
                     />
                     <label
                         htmlFor="fileInput"
