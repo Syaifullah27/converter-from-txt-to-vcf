@@ -14,11 +14,11 @@ const App = () => {
     <>
       <Navbar />
       <div className='flex gap-4 max-sm:flex-col flex-wrap p-5'>
-        <AdminNavyMember />
-        <OnlyNumber />
-        <CustomKeywords />
-        <OnlyNumberWithAAA />
+        {/* <AdminNavyMember /> */}
+        {/* <OnlyNumber /> */}
+        {/* <CustomKeywords /> */}
         <OpsionalKeywordAndContact />
+        <OnlyNumberWithAAA />
       </div>
     </>
   )

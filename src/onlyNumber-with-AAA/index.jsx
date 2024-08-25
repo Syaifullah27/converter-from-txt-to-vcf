@@ -18,7 +18,15 @@ function App() {
             reader.onload = (e) => {
                 const filteredContent = e.target.result
                     .split('\n')
-                    .map(line => line.split(' ')[0])
+                    .map(line => {
+                        // Hapus teks "AAA" dari nomor telepon dan ambil hanya nomor telepon
+                        const cleanLine = line.replace(/AAA/g, '').trim();
+                        // Deteksi apakah ini nomor telepon yang valid
+                        if (/^\+?\d+$/.test(cleanLine)) {
+                            return cleanLine;
+                        }
+                        return ''; // Abaikan baris yang tidak valid
+                    })
                     .filter(line => line.trim() !== '');
 
                 setFileContent(filteredContent.join('\n'));
