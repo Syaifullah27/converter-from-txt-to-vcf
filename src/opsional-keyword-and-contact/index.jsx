@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ModalBox from '../ModalBOX';
+import PreviewFile from '../previewFIle';
 
 // eslint-disable-next-line react/prop-types
 function CustomKeywords({ isDarkMode }) {
     const [fileContent, setFileContent] = useState('');
-    const [fileName, setFileName] = useState(''); // State untuk menyimpan nama file
+    const [fileName, setFileName] = useState('');
     const [adminName, setAdminName] = useState('Admin');
     const [navyName, setNavyName] = useState('Navy');
     const [memberName, setMemberName] = useState('Member');
@@ -16,6 +17,8 @@ function CustomKeywords({ isDarkMode }) {
     const [adminKeyword, setAdminKeyword] = useState('');
     const [navyKeyword, setNavyKeyword] = useState('');
     const [memberKeyword, setMemberKeyword] = useState('');
+    const [filePreview, setFilePreview] = useState('');
+    const [showPreview, setShowPreview] = useState(false); // State untuk modal preview
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -23,14 +26,23 @@ function CustomKeywords({ isDarkMode }) {
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setFileName(file.name); // Simpan nama file ke state
+            setFileName(file.name);
             const reader = new FileReader();
             reader.onload = (event) => {
                 setFileContent(event.target.result);
+                setFilePreview(event.target.result); // Set preview content
             };
             reader.readAsText(file);
+
+            // Secara otomatis mengubah nama file input
+            const updatedFileName = file.name.replace('.txt', '.vcf');
+            setAdminNavyFileName(updatedFileName);
         }
     };
+
+
+    const handlePreviewClose = () => setShowPreview(false); // Tutup modal preview
+    const handlePreviewShow = () => setShowPreview(true); // Buka modal preview
 
     useEffect(() => {
         axios.get('/src/ExampleFile/opsional-contact-keyword.txt', { responseType: 'text' })
@@ -47,45 +59,40 @@ function CustomKeywords({ isDarkMode }) {
         const lines = content.split('\n').filter(line => line.trim() !== '');
         let vcfContentAdminNavy = '';
         let vcfContentMember = '';
-        let currentContactType = ''; 
+        let currentContactType = '';
         let contactNumberAdmin = 1;
         let contactNumberNavy = 1;
         let contactNumberMember = 1;
-        
-        // Regular expression untuk mendeteksi nomor telepon termasuk yang mengandung tanda '+'
+
         const phoneNumberRegex = /^\+?\d+$/;
-        
+
         lines.forEach((line) => {
-            // Abaikan baris yang tidak mengandung keyword atau nomor telepon
-            if (!phoneNumberRegex.test(line.trim()) && 
-                !line.includes(adminKeyword) && 
-                !line.includes(navyKeyword) && 
+            if (!phoneNumberRegex.test(line.trim()) &&
+                !line.includes(adminKeyword) &&
+                !line.includes(navyKeyword) &&
                 !line.includes(memberKeyword)) {
                 return;
             }
-    
-            // Jika ada 'AAA' di dalam nomor, hapus 'AAA' tersebut
+
             if (line.includes('AAA')) {
                 line = line.replace('AAA', '').trim();
             }
-    
-            // Tentukan tipe kontak berdasarkan keyword
+
             if (adminKeyword && line.includes(adminKeyword)) {
                 currentContactType = adminName || 'Admin';
-                return; 
+                return;
             } else if (navyKeyword && line.includes(navyKeyword)) {
                 currentContactType = navyName || 'Navy';
-                return; 
+                return;
             } else if (memberKeyword && line.includes(memberKeyword)) {
                 currentContactType = memberName || 'Member';
-                return; 
+                return;
             }
-    
-            // Hanya proses nomor telepon yang valid
+
             if (phoneNumberRegex.test(line.trim())) {
                 let contactNumber;
                 let contactName;
-    
+
                 if (currentContactType === (adminName || 'Admin')) {
                     contactNumber = contactNumberAdmin++;
                     contactName = `${adminName} ${contactNumber}`;
@@ -96,9 +103,9 @@ function CustomKeywords({ isDarkMode }) {
                     contactNumber = contactNumberMember++;
                     contactName = `${memberName} ${contactNumber}`;
                 }
-    
+
                 const vcfEntry = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactName}\nTEL:${line.trim()}\nEND:VCARD\n`;
-    
+
                 if (currentContactType === (memberName || 'Member')) {
                     vcfContentMember += vcfEntry;
                 } else {
@@ -106,21 +113,18 @@ function CustomKeywords({ isDarkMode }) {
                 }
             }
         });
-    
+
         return { vcfContentAdminNavy, vcfContentMember };
     };
-    
-    
 
     const handleDownload = (content, fileName) => {
-        // Hapus ".vcf" yang berlebihan jika fileName diakhiri dengan ".vcf.vcf"
         let finalFileName = fileName;
         if (fileName.endsWith('.vcf.vcf')) {
-            finalFileName = fileName.slice(0, -4); // Hilangkan ".vcf" yang kedua
+            finalFileName = fileName.slice(0, -4);
         } else if (!fileName.endsWith('.vcf')) {
-            finalFileName = `${fileName}.vcf`; // Tambahkan ".vcf" jika belum ada
+            finalFileName = `${fileName}.vcf`;
         }
-        
+
         const blob = new Blob([content], { type: 'text/vcard' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -129,12 +133,12 @@ function CustomKeywords({ isDarkMode }) {
         link.click();
         URL.revokeObjectURL(url);
     };
-    
+
     const handleConvertAndDownload = () => {
         const { vcfContentAdminNavy, vcfContentMember } = convertToVcf(fileContent || fileExample);
-        
+
         const isConfirmed = window.confirm("Are you sure the format and input are correct? If so, click OK to continue.");
-        
+
         if (isConfirmed) {
             if (vcfContentAdminNavy) {
                 handleDownload(vcfContentAdminNavy, adminNavyFileName);
@@ -161,7 +165,7 @@ function CustomKeywords({ isDarkMode }) {
                 </div>
 
                 <div className="mt-4">
-                <div className="flex gap-4 py-4">
+                    <div className="flex gap-4 py-4">
                         <div className="flex flex-col gap-2">
                             <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin Keyword</h3>
                             <input
@@ -194,7 +198,7 @@ function CustomKeywords({ isDarkMode }) {
                         </div>
                     </div>
                     <div className="flex gap-4 py-2">
-                        
+
                         <div className="flex flex-col gap-2">
                             <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin Contact Name</h3>
                             <input
@@ -216,22 +220,6 @@ function CustomKeywords({ isDarkMode }) {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin/Navy File Name</h3>
-                            <input
-                                type="text"
-                                placeholder="Enter Admin/Navy file name"
-                                value={adminNavyFileName}
-                                onChange={(e) => setAdminNavyFileName(e.target.value)}
-                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
-                            />
-                        </div>
-                    </div>
-                
-                </div>
-
-                <div className="mt-4">
-                    <div className="flex gap-4">
-                        <div className="flex flex-col gap-2">
                             <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Member Contact Name</h3>
                             <input
                                 type="text"
@@ -241,48 +229,68 @@ function CustomKeywords({ isDarkMode }) {
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
                             />
                         </div>
+                    </div>
+                    <div className="flex gap-4 py-2">
+                        <div className="flex flex-col gap-2">
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin/Navy File Name</h3>
+                            <input
+                                type="text"
+                                placeholder="Enter file name for Admin/Navy"
+                                value={adminNavyFileName}
+                                onChange={(e) => setAdminNavyFileName(e.target.value)}
+                                className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
+                            />
+                        </div>
                         <div className="flex flex-col gap-2">
                             <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Member File Name</h3>
                             <input
                                 type="text"
-                                placeholder="Enter Member file name"
+                                placeholder="Enter file name for Member"
                                 value={memberFileName}
                                 onChange={(e) => setMemberFileName(e.target.value)}
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
                             />
                         </div>
                     </div>
-                </div>
-                <div className="mt-4 flex justify-between pt-4">
-                    <label
-                        htmlFor="file-upload"
-                        className="bg-blue-500 text-[#f5f5f5] p-2 rounded-md cursor-pointer"
-                    >
-                        Choose File
-                    </label>
-                    <input
-                        id="file-upload"
-                        type="file"
-                        accept=".txt"
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                    />
-                    <span className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md ${isDarkMode ? 'text-gray-200' : ''}`}>
-                    {fileName ? ` ${fileName}` : 'No file selected'}
-                    </span>
-                </div>
 
-                {/* Hanya tampilkan tombol download jika fileName tidak kosong */}
-                {fileName && (
-                    <div className="mt-4 w-full">
-                        <button
-                            onClick={handleConvertAndDownload}
-                            className="bg-green-500 w-full font-medium text-[#f5f5f5] p-2 px-4 rounded-md"
+                    <div className=" pt-4 flex justify-between items-center">
+                        <input
+                            type="file"
+                            id='fileSYH'
+                            accept=".txt"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                        />
+                        <label
+                            htmlFor="fileSYH"
+                            className="bg-blue-500 text-white p-2 rounded-md cursor-pointer"
                         >
-                            Convert and Download VCF
-                        </button>
+                            Choose File
+                        </label>
+                        <span
+                        className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md cursor-pointer ${isDarkMode ? 'text-gray-200' : ''}`}
+                        onClick={fileName ? handlePreviewShow : null} // Tampilkan modal preview ketika diklik
+                    >
+                        {fileName ? ` ${fileName}` : 'No file selected'}
+                    </span>
+                        {filePreview && (
+                            <PreviewFile show={showPreview} handleClose={handlePreviewClose} fileContent={fileContent} />
+                        )}
                     </div>
-                )}
+
+                    <div className="text-center pt-4">
+                        {
+                            fileName && (
+                                <button
+                                    className="bg-green-500 w-full font-medium text-white py-2 px-4 rounded-md"
+                                    onClick={handleConvertAndDownload}
+                                >
+                                    Convert and Download
+                                </button>
+                            )
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     );

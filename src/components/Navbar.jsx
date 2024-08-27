@@ -1,18 +1,31 @@
 /* eslint-disable react/prop-types */
 // import { useState } from 'react';
 import { Switch } from '@headlessui/react';
+import { useEffect } from 'react';
 
 const Navbar = ({isDarkMode, setIsDarkMode}) => {
     // const [isDarkMode, setIsDarkMode] = useState(false);
+
+    useEffect(() => {
+        // Cek status dark mode dari localStorage
+        const savedMode = localStorage.getItem('darkMode');
+        if (savedMode === 'enabled') {
+            setIsDarkMode(true);
+            document.documentElement.classList.add('dark');
+        }
+    }, []);
 
     const toggleDarkMode = () => {
         setIsDarkMode(!isDarkMode);
         if (!isDarkMode) {
             document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'enabled');
         } else {
             document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'disabled');
         }
     };
+
 
     return (
         <div className={`p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-slate-900'}`}>

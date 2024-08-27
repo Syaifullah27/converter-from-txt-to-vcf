@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ModalBox from '../ModalBOX';
+import PreviewFile from '../previewFIle';
 
 // eslint-disable-next-line react/prop-types
 function App({ isDarkMode }) {
@@ -9,12 +10,17 @@ function App({ isDarkMode }) {
     const [fileName, setFileName] = useState('file.vcf');
     const [fileExample, setFileExample] = useState('');
     const [show, setShow] = useState(false);
+    const [showPreview, setShowPreview] = useState(false); // State untuk modal preview
     const [selectedFileName, setSelectedFileName] = useState('');
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setSelectedFileName(file.name);
+            const originalFileName = file.name;
+            const baseName = originalFileName.replace(/\.[^/.]+$/, ''); // Menghapus ekstensi asli
+            setFileName(`${baseName}.vcf`); // Mengubah nama file secara otomatis
+    
+            setSelectedFileName(originalFileName);
             const reader = new FileReader();
             reader.onload = (e) => {
                 const filteredContent = e.target.result
@@ -29,13 +35,13 @@ function App({ isDarkMode }) {
                         return ''; // Abaikan baris yang tidak valid
                     })
                     .filter(line => line.trim() !== '');
-
+    
                 setFileContent(filteredContent.join('\n'));
             };
             reader.readAsText(file);
         }
     };
-
+    
     const handleContactNameChange = (event) => {
         setContactName(event.target.value);
     };
@@ -80,6 +86,9 @@ function App({ isDarkMode }) {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    const handlePreviewClose = () => setShowPreview(false); // Tutup modal preview
+    const handlePreviewShow = () => setShowPreview(true); // Buka modal preview
+
     useEffect(() => {
         axios.get('/src/ExampleFile/onlyNumberWithAAA.txt', { responseType: 'text' })
             .then((response) => {
@@ -123,7 +132,7 @@ function App({ isDarkMode }) {
                 </div>
             </div>
             <div className='flex flex-col gap-4 pt-7'>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 justify-between">
                     <input
                         type="file"
                         accept=".txt"
@@ -137,7 +146,10 @@ function App({ isDarkMode }) {
                     >
                         Choose File
                     </label>
-                    <span className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md ${isDarkMode ? 'text-gray-200' : ''}`}>
+                    <span
+                        className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md cursor-pointer ${isDarkMode ? 'text-gray-200' : ''}`}
+                        onClick={selectedFileName ? handlePreviewShow : null} // Tampilkan modal preview ketika diklik
+                    >
                         {selectedFileName ? ` ${selectedFileName}` : 'No file selected'}
                     </span>
                 </div>
@@ -149,6 +161,9 @@ function App({ isDarkMode }) {
                     </button>
                 )}
             </div>
+
+            {/* Modal Preview */}
+            <PreviewFile show={showPreview} handleClose={handlePreviewClose} fileContent={fileContent} />
         </div>
     );
 }
