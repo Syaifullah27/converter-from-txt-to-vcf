@@ -9,16 +9,16 @@ function CustomKeywords({ isDarkMode }) {
     const [fileName, setFileName] = useState('');
     const [adminName, setAdminName] = useState('Admin');
     const [navyName, setNavyName] = useState('Navy');
-    const [memberName, setMemberName] = useState('Member');
+    const [memberName, setMemberName] = useState('');
     const [adminNavyFileName, setAdminNavyFileName] = useState('AdminNavy.vcf');
-    const [memberFileName, setMemberFileName] = useState('Member.vcf');
+    const [memberFileName, setMemberFileName] = useState('');
     const [show, setShow] = useState(false);
     const [fileExample, setFileExample] = useState('');
     const [adminKeyword, setAdminKeyword] = useState('');
     const [navyKeyword, setNavyKeyword] = useState('');
     const [memberKeyword, setMemberKeyword] = useState('');
     const [filePreview, setFilePreview] = useState('');
-    const [showPreview, setShowPreview] = useState(false);
+    const [showPreview, setShowPreview] = useState(false); // State untuk modal preview
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -29,59 +29,31 @@ function CustomKeywords({ isDarkMode }) {
             setFileName(file.name);
             const reader = new FileReader();
             reader.onload = (event) => {
-                const content = event.target.result;
-                setFileContent(content);
-                setFilePreview(content);
-
-                // Deteksi keyword secara otomatis
-                const detectedKeywords = detectKeywords(content);
-                if (detectedKeywords.length === 2) {
-                    setAdminKeyword(detectedKeywords[0]);
-                    setNavyKeyword(detectedKeywords[1]);
-                    setMemberKeyword('');
-                    setMemberName('');
-                    setMemberFileName('');
-                } else if (detectedKeywords.length >= 3) {
-                    setAdminKeyword(detectedKeywords[0]);
-                    setNavyKeyword(detectedKeywords[1]);
-                    setMemberKeyword(detectedKeywords[2]);
-                }
-
-                // Secara otomatis mengubah nama file input
-                const updatedFileName = file.name.replace('.txt', '.vcf');
-                setAdminNavyFileName(updatedFileName);
+                setFileContent(event.target.result);
+                setFilePreview(event.target.result); // Set preview content
             };
             reader.readAsText(file);
+
+            // Secara otomatis mengubah nama file input
+            const updatedFileName = file.name.replace('.txt', '.vcf');
+            setAdminNavyFileName(updatedFileName);
         }
     };
 
-    const detectKeywords = (content) => {
-        const lines = content.split('\n').filter(line => line.trim() !== '');
-        const keywords = new Set();
 
-        lines.forEach((line) => {
-            if (!/^\+?\d+$/.test(line.trim())) {
-                keywords.add(line.trim());
-            }
-        });
+    const handlePreviewClose = () => setShowPreview(false); // Tutup modal preview
+    const handlePreviewShow = () => setShowPreview(true); // Buka modal preview
 
-        return Array.from(keywords);
-    };
-
-    const handleConvertAndDownload = () => {
-        const { vcfContentAdminNavy, vcfContentMember } = convertToVcf(fileContent || fileExample);
-
-        const isConfirmed = window.confirm("Are you sure the format and input are correct? If so, click OK to continue.");
-
-        if (isConfirmed) {
-            if (vcfContentAdminNavy) {
-                handleDownload(vcfContentAdminNavy, adminNavyFileName);
-            }
-            if (vcfContentMember && memberKeyword) {
-                handleDownload(vcfContentMember, memberFileName);
-            }
-        }
-    };
+    useEffect(() => {
+        axios.get('/src/ExampleFile/opsional-contact-keyword.txt', { responseType: 'text' })
+            .then((response) => {
+                setFileExample(response.data);
+            })
+            .catch((error) => {
+                console.error("Error loading the default file:", error);
+                setFileExample("Error loading file.");
+            });
+    }, []);
 
     const convertToVcf = (content) => {
         const lines = content.split('\n').filter(line => line.trim() !== '');
@@ -162,6 +134,21 @@ function CustomKeywords({ isDarkMode }) {
         URL.revokeObjectURL(url);
     };
 
+    const handleConvertAndDownload = () => {
+        const { vcfContentAdminNavy, vcfContentMember } = convertToVcf(fileContent || fileExample);
+
+        const isConfirmed = window.confirm("Are you sure the format and input are correct? If so, click OK to continue.");
+
+        if (isConfirmed) {
+            if (vcfContentAdminNavy) {
+                handleDownload(vcfContentAdminNavy, adminNavyFileName);
+            }
+            if (vcfContentMember && memberKeyword) {
+                handleDownload(vcfContentMember, memberFileName);
+            }
+        }
+    };
+
     return (
         <div>
             <div className="p-4 border-2 border-[#dedede] rounded-lg w-max">
@@ -222,7 +209,6 @@ function CustomKeywords({ isDarkMode }) {
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
                             />
                         </div>
-
                         <div className="flex flex-col gap-2">
                             <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Navy Contact Name</h3>
                             <input
@@ -244,13 +230,12 @@ function CustomKeywords({ isDarkMode }) {
                             />
                         </div>
                     </div>
-
                     <div className="flex gap-4 py-2">
                         <div className="flex flex-col gap-2">
-                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>AdminNavy File Name</h3>
+                            <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Admin/Navy File Name</h3>
                             <input
                                 type="text"
-                                placeholder="Enter File Name"
+                                placeholder="Enter file name for Admin/Navy"
                                 value={adminNavyFileName}
                                 onChange={(e) => setAdminNavyFileName(e.target.value)}
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
@@ -260,7 +245,7 @@ function CustomKeywords({ isDarkMode }) {
                             <h3 className={`font-medium ${isDarkMode ? 'text-white' : ''}`}>Member File Name</h3>
                             <input
                                 type="text"
-                                placeholder="Enter Member File Name"
+                                placeholder="Enter file name for Member"
                                 value={memberFileName}
                                 onChange={(e) => setMemberFileName(e.target.value)}
                                 className="border border-[#dedede] p-2 rounded-md placeholder:text-sm"
@@ -268,35 +253,45 @@ function CustomKeywords({ isDarkMode }) {
                         </div>
                     </div>
 
-                    <div className="py-2">
+                    <div className=" pt-4 flex justify-between items-center">
                         <input
                             type="file"
+                            id='fileSYH'
+                            accept=".txt"
                             onChange={handleFileUpload}
-                            className="p-2 rounded-md cursor-pointer border"
+                            className="hidden"
                         />
-                        <button
-                            onClick={() => setShowPreview(!showPreview)} // Toggle preview modal
-                            className="bg-blue-500 text-[#f5f5f5] p-2 px-4 ml-4 rounded-md"
+                        <label
+                            htmlFor="fileSYH"
+                            className="bg-blue-500 text-white p-2 rounded-md cursor-pointer"
                         >
-                            Preview
-                        </button>
+                            Choose File
+                        </label>
+                        <span
+                        className={`text-sm text-gray-700 border border-[#dedede] flex justify-center items-center p-2 rounded-md cursor-pointer ${isDarkMode ? 'text-gray-200' : ''}`}
+                        onClick={fileName ? handlePreviewShow : null} // Tampilkan modal preview ketika diklik
+                    >
+                        {fileName ? ` ${fileName}` : 'No file selected'}
+                    </span>
+                        {filePreview && (
+                            <PreviewFile show={showPreview} handleClose={handlePreviewClose} fileContent={fileContent} />
+                        )}
                     </div>
 
-                    <div className="flex justify-between items-center">
-                        <button
-                            onClick={handleConvertAndDownload}
-                            className="bg-blue-500 text-[#f5f5f5] p-2 px-4 rounded-md"
-                        >
-                            Download
-                        </button>
+                    <div className="text-center pt-4">
+                        {
+                            fileName && (
+                                <button
+                                    className="bg-green-500 w-full font-medium text-white py-2 px-4 rounded-md"
+                                    onClick={handleConvertAndDownload}
+                                >
+                                    Convert and Download
+                                </button>
+                            )
+                        }
                     </div>
                 </div>
             </div>
-            <PreviewFile
-                show={showPreview}
-                handleClose={() => setShowPreview(false)}
-                content={filePreview}
-            />
         </div>
     );
 }
