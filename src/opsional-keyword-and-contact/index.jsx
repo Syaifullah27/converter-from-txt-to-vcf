@@ -29,8 +29,10 @@ function CustomKeywords({ isDarkMode }) {
             setFileName(file.name);
             const reader = new FileReader();
             reader.onload = (event) => {
-                setFileContent(event.target.result);
-                setFilePreview(event.target.result); // Set preview content
+                const content = event.target.result;
+                setFileContent(content);
+                setFilePreview(content); // Set preview content
+                detectKeywords(content); // Panggil fungsi detectKeywords setelah membaca file
             };
             reader.readAsText(file);
 
@@ -40,6 +42,43 @@ function CustomKeywords({ isDarkMode }) {
         }
     };
 
+    const detectKeywords = (content) => {
+        const lines = content.split('\n').filter(line => line.trim() !== '');
+        const keywordCandidates = [];
+        const phoneNumberRegex = /^\+?\d+$/;
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+
+            // Hapus "AAA" dari nomor kontak sebelum memproses lebih lanjut
+            if (line.includes('AAA')) {
+                line = line.replace('AAA', '').trim();
+            }
+
+            // Abaikan teks yang tidak diikuti oleh nomor kontak
+            if (!phoneNumberRegex.test(line) && i < lines.length - 1) {
+                let nextLine = lines[i + 1].trim();
+
+                // Hapus "AAA" dari nomor kontak berikutnya
+                if (nextLine.includes('AAA')) {
+                    nextLine = nextLine.replace('AAA', '').trim();
+                }
+
+                if (phoneNumberRegex.test(nextLine)) {
+                    keywordCandidates.push(line);
+                }
+            }
+        }
+
+        if (keywordCandidates.length === 2) {
+            setAdminKeyword(keywordCandidates[0]);
+            setNavyKeyword(keywordCandidates[1]);
+        } else if (keywordCandidates.length > 2) {
+            setAdminKeyword(keywordCandidates[0]);
+            setNavyKeyword(keywordCandidates[1]);
+            setMemberKeyword(keywordCandidates[2]);
+        }
+    };
 
     const handlePreviewClose = () => setShowPreview(false); // Tutup modal preview
     const handlePreviewShow = () => setShowPreview(true); // Buka modal preview
@@ -67,15 +106,16 @@ function CustomKeywords({ isDarkMode }) {
         const phoneNumberRegex = /^\+?\d+$/;
 
         lines.forEach((line) => {
+            // Hapus "AAA" dari nomor kontak sebelum memproses lebih lanjut
+            if (line.includes('AAA')) {
+                line = line.replace('AAA', '').trim();
+            }
+
             if (!phoneNumberRegex.test(line.trim()) &&
                 !line.includes(adminKeyword) &&
                 !line.includes(navyKeyword) &&
                 !line.includes(memberKeyword)) {
                 return;
-            }
-
-            if (line.includes('AAA')) {
-                line = line.replace('AAA', '').trim();
             }
 
             if (adminKeyword && line.includes(adminKeyword)) {
