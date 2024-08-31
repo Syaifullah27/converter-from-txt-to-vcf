@@ -5,8 +5,8 @@ import AdminNavyMember from './ADMIN-NAVY(1file)-MEMBER(1file)'
 import OnlyNumber from './Basic-OnlyNumber';
 import Navbar from './components/Navbar';
 import CustomKeywords from './custom-keywords';
-import OpsionalKeywordAndContact from './opsional-keyword-and-contact';
 import OnlyNumberWithAAA from './onlyNumber-with-AAA';
+import AutoDetecKeyword from './opsional-keyword-and-contact';
 
 
 const App = () => {
@@ -18,7 +18,7 @@ const App = () => {
         {/* <AdminNavyMember /> */}
         {/* <OnlyNumber /> */}
         {/* <CustomKeywords /> */}
-        <OpsionalKeywordAndContact isDarkMode={isDarkMode}/>
+        <AutoDetecKeyword isDarkMode={isDarkMode}/>
         <OnlyNumberWithAAA isDarkMode={isDarkMode}/>
       </div>
     </div>

@@ -12,6 +12,7 @@ function App({ isDarkMode }) {
     const [show, setShow] = useState(false);
     const [showPreview, setShowPreview] = useState(false); // State untuk modal preview
     const [selectedFileName, setSelectedFileName] = useState('');
+    const [convertedFiles, setConvertedFiles] = useState([]); // State untuk menyimpan file yang sudah dikonversi
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -37,11 +38,12 @@ function App({ isDarkMode }) {
                     .filter(line => line.trim() !== '');
     
                 setFileContent(filteredContent.join('\n'));
+                handleConvert(filteredContent.join('\n')); // Langsung convert setelah file dipilih
             };
             reader.readAsText(file);
         }
     };
-    
+
     const handleContactNameChange = (event) => {
         setContactName(event.target.value);
     };
@@ -63,24 +65,42 @@ function App({ isDarkMode }) {
         return vcfContent;
     };
 
-    const handleDownload = () => {
-        const vcfContent = convertToVcf(fileContent);
-        const blob = new Blob([vcfContent], { type: 'text/vcard' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+    const handleConvert = (content) => {
+        const vcfContent = convertToVcf(content || fileContent);
+        const newConvertedFile = {
+            content: vcfContent,
+            fileName: fileName,
+            contactName: contactName
+        };
 
-        // Memastikan nama file tidak memiliki ".vcf" dua kali
-        let downloadFileName = fileName;
-        if (downloadFileName.toLowerCase().endsWith('.vcf.vcf')) {
-            downloadFileName = downloadFileName.slice(0, -4);
-        } else if (!downloadFileName.toLowerCase().endsWith('.vcf')) {
-            downloadFileName += '.vcf';
-        }
+        setConvertedFiles([...convertedFiles, newConvertedFile]);
+    };
 
-        link.href = url;
-        link.download = downloadFileName;
-        link.click();
-        URL.revokeObjectURL(url);
+    const handleDownloadAll = () => {
+        convertedFiles.forEach(file => {
+            const blob = new Blob([file.content], { type: 'text/vcard' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            let downloadFileName = file.fileName;
+            if (downloadFileName.toLowerCase().endsWith('.vcf.vcf')) {
+                downloadFileName = downloadFileName.slice(0, -4);
+            } else if (!downloadFileName.toLowerCase().endsWith('.vcf')) {
+                downloadFileName += '.vcf';
+            }
+
+            link.href = url;
+            link.download = downloadFileName;
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+
+        setConvertedFiles([]); // Reset daftar file setelah diunduh
+    };
+
+    const handleDeleteFile = (index) => {
+        const updatedFiles = convertedFiles.filter((_, i) => i !== index);
+        setConvertedFiles(updatedFiles);
     };
 
     const handleClose = () => setShow(false);
@@ -153,13 +173,47 @@ function App({ isDarkMode }) {
                         {selectedFileName ? ` ${selectedFileName}` : 'No file selected'}
                     </span>
                 </div>
-                {fileContent && (
-                    <button
-                        className="bg-green-500 font-medium text-white p-2 px-4 rounded-md"
-                        onClick={handleDownload}>
-                        Convert and Download VCF
-                    </button>
+
+                {convertedFiles.length > 0 && (
+                    <div className="my-4">
+                        <h2 className={`font-semibold ${isDarkMode ? 'text-white' : ''}`}>Converted Files</h2>
+                        <table className="min-w-full table-auto">
+                            <thead>
+                                <tr className="bg-gray-200">
+                                    <th className="px-4 py-2">File Name</th>
+                                    <th className="px-4 py-2">Contact Name</th>
+                                    <th className="px-4 py-2">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {convertedFiles.map((file, index) => (
+                                    <tr key={index} className="bg-white text-gray-700">
+                                        <td className="border px-4 py-2">{file.fileName}</td>
+                                        <td className="border px-4 py-2">{file.contactName}</td>
+                                        <td className="border px-4 py-2 text-center">
+                                            <button
+                                                className="bg-red-500 text-white px-2 py-1 rounded-md"
+                                                onClick={() => handleDeleteFile(index)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
+
+                <div className="flex gap-4">
+                    <button
+                        className="bg-green-500 w-full font-medium text-white py-2 px-4 rounded-md"
+                        onClick={handleDownloadAll}
+                        disabled={convertedFiles.length === 0}
+                    >
+                        Download {convertedFiles.length} {convertedFiles.length === 1 ? 'file' : 'files'}
+                    </button>
+                </div>
             </div>
 
             {/* Modal Preview */}
