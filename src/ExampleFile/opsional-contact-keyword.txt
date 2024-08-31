@@ -27,3 +27,7 @@
 966575614666
 966575614666
 966575614666
+
+
+
+#Text below which there is no contact number will be deleted and not detected.

@@ -9,3 +9,6 @@
 85261820598 AAA
 85291071936 
 85266859566 
+
+
+#Text below which there is no contact number will be deleted and not detected.
