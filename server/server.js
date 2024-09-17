@@ -1,57 +1,41 @@
+/* eslint-disable no-undef */
 const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-const path = require('path');
+const cors = require('cors');
+const midtransClient = require('midtrans-client');
+require('dotenv').config();
 
 const app = express();
-const port = 5000;
+app.use(cors());
+app.use(express.json());
 
-const MIDTRANS_SERVER_KEY = 'SB-Mid-server-AVXq0TFmxFzN4Ep5_YN7gNzt';
-
-app.use(bodyParser.json());
-
-// Serve the React app
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+// Set up Midtrans
+let snap = new midtransClient.Snap({
+  isProduction: false, // Ubah ke true saat di production
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
 });
 
-// Route untuk memproses pembayaran
-app.post('/api/transaction', async (req, res) => {
-  const { order_id, gross_amount, customer_name, customer_email } = req.body;
+app.post('/api/subscribe', async (req, res) => {
+  const { userId, amount } = req.body;
 
-  const transactionData = {
+  const parameter = {
     transaction_details: {
-      order_id,
-      gross_amount,
+      order_id: `order-${userId}-${Date.now()}`,
+      gross_amount: amount,
     },
     customer_details: {
-      first_name: customer_name,
-      email: customer_email,
-    },
-    credit_card: {
-      secure: true,
+      email: 'user@example.com',
     },
   };
 
   try {
-    const response = await axios.post(
-      'https://api.sandbox.midtrans.com/v2/charge',
-      transactionData,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${Buffer.from(MIDTRANS_SERVER_KEY).toString('base64')}`,
-        },
-      }
-    );
-    res.json(response.data);
+    const transaction = await snap.createTransaction(parameter);
+    res.json({ token: transaction.token });
   } catch (error) {
-    res.status(500).json({ message: 'Payment failed', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
