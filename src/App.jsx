@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 // import CustomKeywords from './custom-keywords';
 import OnlyNumberWithAAA from './onlyNumber-with-AAA';
 import AutoDetecKeyword from './opsional-keyword-and-contact';
+import Auth from './Auth/FormAuth';
 
 
 const App = () => {
@@ -15,7 +16,8 @@ const App = () => {
 
   return (
     <div className={`App ${isDarkMode ? 'bg-black' : ''}`}>
-      <Navbar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}/>
+      <Navbar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+      <Auth />
       <div className='flex gap-4 max-sm:flex-col flex-wrap p-5'>
         {/* <AdminNavyMember /> */}
         {/* <OnlyNumber /> */}

@@ -5,15 +5,14 @@ import { useEffect, useState } from 'react';
 import SubscriptionModal from './SubscribeForm';
 
 const Navbar = ({ isDarkMode, setIsDarkMode }) => {
-    // const [isDarkMode, setIsDarkMode] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(false); // State untuk melacak status berlangganan
 
     const toggleModal = () => {
         setModalOpen(!isModalOpen);
     };
 
     useEffect(() => {
-        // Cek status dark mode dari localStorage
         const savedMode = localStorage.getItem('darkMode');
         if (savedMode === 'enabled') {
             setIsDarkMode(true);
@@ -32,23 +31,27 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
         }
     };
 
+    const handleSubscribe = () => {
+        setIsSubscribed(true); // Set state isSubscribed jadi true setelah berlangganan
+        setModalOpen(false); // Tutup modal setelah sukses berlangganan
+    };
 
     return (
         <div className={`p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-slate-900'}`}>
             <div className="flex justify-between items-center px-4">
                 <img src="logo.png" alt="" width={250} />
-                {/* <h1 className="text-center text-3xl font-bold text-white">
-                EsyehaX Converter
-                </h1> */}
-
-                <div className='flex gap-5 justify-center items-center'>
+                <div className="flex gap-5 justify-center items-center">
                     <button
                         onClick={toggleModal}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        className={`${
+                            isSubscribed ? 'bg-gray-400 italic' : 'bg-blue-500 hover:bg-blue-700'
+                        } text-white font-bold py-2 px-4 rounded`}
                     >
-                        Berlangganan
+                        {isSubscribed ? 'Premium' : 'Berlangganan'}
                     </button>
-                    {isModalOpen && <SubscriptionModal onClose={toggleModal} />}
+                    {isModalOpen && (
+                        <SubscriptionModal onClose={toggleModal} onSubscribe={handleSubscribe} />
+                    )}
                     <Switch
                         checked={isDarkMode}
                         onChange={toggleDarkMode}
@@ -56,8 +59,7 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
                             relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none`}
                     >
                         <span
-                            className={`${isDarkMode ? 'translate-x-6' : 'translate-x-1'}
-                                inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300`}
+                            className={`${isDarkMode ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300`}
                         />
                     </Switch>
                 </div>

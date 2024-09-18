@@ -1,7 +1,7 @@
 // import React from 'react';
 
 // eslint-disable-next-line react/prop-types
-const SubscriptionModal = ({ onClose }) => {
+const SubscriptionModal = ({ onClose, onSubscribe }) => {  // Tambahkan prop onSubscribe
     const handleSubscribe = async () => {
         try {
             const response = await fetch('http://localhost:5000/api/subscribe', {
@@ -17,7 +17,15 @@ const SubscriptionModal = ({ onClose }) => {
 
             if (data.token) {
                 // Pastikan Snap.js memanggil token dengan benar
-                window.snap.pay(data.token);
+                window.snap.pay(data.token, {
+                    onSuccess: function(result) {
+                        console.log('Payment success:', result);
+                        onSubscribe();  // Panggil callback untuk memberitahu bahwa sudah berlangganan
+                    },
+                    onError: function(result) {
+                        console.error('Payment error:', result);
+                    }
+                });
             } else {
                 console.error('Token tidak ditemukan di respons API');
             }
