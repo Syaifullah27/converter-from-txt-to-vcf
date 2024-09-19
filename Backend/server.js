@@ -1,19 +1,27 @@
 /* eslint-disable no-undef */
 const express = require('express');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const userRoutes = require('./routes/userRoutes');
-const cors = require('cors');
-
-dotenv.config();
-connectDB();
-
+const mongoose = require('mongoose');
+const cors = require('cors'); // Import cors
+const authRoutes = require('./routes/auth');
 const app = express();
-app.use(cors());
+
+// Menghubungkan ke MongoDB
+mongoose.connect('mongodb://localhost:27017/AUTH', { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Middleware CORS
+app.use(cors({
+  origin: 'http://localhost:3000', // Izinkan hanya request dari front-end di port 3000
+  methods: ['GET', 'POST'], // Izinkan metode GET dan POST
+  credentials: true // Izinkan credentials seperti cookies
+}));
+
+// Middleware untuk JSON request
 app.use(express.json());
 
-app.use('/api/users', userRoutes);
+// Rute untuk autentikasi
+app.use('/api/auth', authRoutes);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Menjalankan server
+app.listen(5001, () => {
+  console.log('Server running on port 5001');
+});

@@ -1,29 +1,32 @@
-// import React from 'react';
+import axios from 'axios';
 
 // eslint-disable-next-line react/prop-types
-const SubscriptionModal = ({ onClose, onSubscribe }) => {  // Tambahkan prop onSubscribe
+const SubscriptionModal = ({ onClose, onSubscribe }) => {
     const handleSubscribe = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/subscribe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId: '123', amount: 1 }), // Sesuaikan payload
+            const response = await axios.post('http://localhost:5000/api/subscribe', {
+                userId: '123',
+                amount: 10000, // Sesuaikan dengan harga langganan per bulan
+                duration: '1 month' // Tambahkan informasi durasi berlangganan
             });
 
-            const data = await response.json();
-            console.log(data); // Cek apakah token benar-benar diterima
+            const data = response.data;
+            console.log(data);
 
             if (data.token) {
-                // Pastikan Snap.js memanggil token dengan benar
                 window.snap.pay(data.token, {
-                    onSuccess: function(result) {
-                        console.log('Payment success:', result);
-                        onSubscribe();  // Panggil callback untuk memberitahu bahwa sudah berlangganan
+                    onSuccess: function (result) {
+                        console.log('Payment successful:', result);
+                        onSubscribe(); // Callback untuk menandai sukses berlangganan
                     },
-                    onError: function(result) {
-                        console.error('Payment error:', result);
+                    onPending: function (result) {
+                        console.log('Payment pending:', result);
+                    },
+                    onError: function (result) {
+                        console.error('Payment failed:', result);
+                    },
+                    onClose: function () {
+                        console.log('Payment popup closed');
                     }
                 });
             } else {
@@ -46,7 +49,7 @@ const SubscriptionModal = ({ onClose, onSubscribe }) => {  // Tambahkan prop onS
                     seperti pengelolaan kontak massal, otomatisasi deteksi nomor telepon, dan banyak lagi.
                 </p>
                 <h3 className="text-xl font-bold mb-2">Harga Berlangganan</h3>
-                <p className="mb-4 text-gray-700">Rp1/bulan</p>
+                <p className="mb-4 text-gray-700">Rp10.000/bulan</p>
                 <h3 className="text-xl font-bold mb-2">Fungsi dan Benefit</h3>
                 <ul className="list-disc list-inside mb-4">
                     <li>Akses penuh ke semua fitur</li>

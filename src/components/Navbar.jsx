@@ -3,6 +3,7 @@
 import { Switch } from '@headlessui/react';
 import { useEffect, useState } from 'react';
 import SubscriptionModal from './SubscribeForm';
+import { Link } from 'react-router-dom';
 
 const Navbar = ({ isDarkMode, setIsDarkMode }) => {
     const [isModalOpen, setModalOpen] = useState(false);
@@ -41,6 +42,8 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
             <div className="flex justify-between items-center px-4">
                 <img src="logo.png" alt="" width={250} />
                 <div className="flex gap-5 justify-center items-center">
+                <Link to="/login" className="text-white hover:text-blue-500">Login</Link>
+                <Link to="/register" className="text-white hover:text-green-500">Register</Link>
                     <button
                         onClick={toggleModal}
                         className={`${

@@ -1,32 +1,22 @@
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
-// import AdminNavyMember from './ADMIN-NAVY(1file)-MEMBER(1file)'
-// import OnlyNumber from './Basic-OnlyNumber';
-import Navbar from './components/Navbar';
-// import CustomKeywords from './custom-keywords';
-import OnlyNumberWithAAA from './onlyNumber-with-AAA';
-import AutoDetecKeyword from './opsional-keyword-and-contact';
-import Auth from './Auth/FormAuth';
+import Home from './home';
+import Login from './pages/login';
+import Register from './pages/Register';
 
 
 const App = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
 
   return (
-    <div className={`App ${isDarkMode ? 'bg-black' : ''}`}>
-      <Navbar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-      <Auth />
-      <div className='flex gap-4 max-sm:flex-col flex-wrap p-5'>
-        {/* <AdminNavyMember /> */}
-        {/* <OnlyNumber /> */}
-        {/* <CustomKeywords /> */}
-        <AutoDetecKeyword isDarkMode={isDarkMode}/>
-        <OnlyNumberWithAAA isDarkMode={isDarkMode}/>
-      </div>
-
-    </div>
+    <Router>
+      <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+    </Routes>
+  </Router>
   )
 }
 
