@@ -1,31 +1,39 @@
 /* eslint-disable no-unused-vars */
 import { useState } from 'react';
 import { register } from '../api/auth';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
+    const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        setError('');
+        setSuccess(false);
+
         try {
             await register(username, password);
-            alert('Registration successful');
+            setSuccess(true);
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
         } catch (err) {
-            setError('Registration failed');
+            setError(err.response?.data?.message || 'Registration failed');
         }
     };
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen bg-gray-200">
-            <h1 className='text-3xl font-bold absolute top-2 left-2 underline'>
-                <Link to="/">Back</Link>
-            </h1>
+        <div className="flex justify-center items-center h-screen bg-gray-200">
             <form onSubmit={handleRegister} className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-4">Register</h2>
-                {error && <p className="text-red-500">{error}</p>}
+
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {success && <p className="text-green-500 mb-4">Registration successful! Redirecting to login...</p>}
+
                 <input
                     type="text"
                     placeholder="Username"
@@ -44,7 +52,6 @@ const Register = () => {
                     Register
                 </button>
             </form>
-            <span className='mt-4 font-medium'>have an account? <Link to="/login" className='text-blue-500'>Login</Link></span>
         </div>
     );
 };
