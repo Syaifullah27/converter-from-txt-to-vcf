@@ -1,53 +1,45 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
 import { useState } from 'react';
-import { login } from '../api/auth';
-import { Link } from 'react-router-dom';
+import { login } from '../controllers/authController';
 
-const Login = ({ onLogin }) => {
-    const [username, setUsername] = useState('');
+const Login = () => {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await login(username, password);
-            localStorage.setItem('token', response.data.token);
-            onLogin();
+            await login(email, password);
+            alert('Login berhasil');
         } catch (err) {
-            setError('Invalid credentials');
+            setError('Email atau password salah');
+            console.log(err);
         }
     };
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen bg-gray-200">
-            <h1 className='text-3xl font-bold absolute top-2 left-2 underline'>
-                <Link to="/">Back</Link>
-            </h1>
-            <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow-lg">
-                <h2 className="text-xl font-bold mb-4">Login</h2>
-                {error && <p className="text-red-500">{error}</p>}
+        <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
+            <form onSubmit={handleLogin} className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+                <h2 className="text-2xl font-bold mb-4">Login</h2>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
                 <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full mb-4 px-4 py-2 border rounded"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full mb-4 p-2 bg-gray-700 text-white rounded"
                 />
                 <input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full mb-4 px-4 py-2 border rounded"
+                    className="w-full mb-4 p-2 bg-gray-700 text-white rounded"
                 />
-                <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" className="w-full p-2 bg-green-500 hover:bg-green-600 rounded">
                     Login
                 </button>
             </form>
-            <span className='mt-4 font-medium'>don't have an account? <Link to="/register" className='text-blue-500'>Regis</Link></span>
         </div>
     );
 };
