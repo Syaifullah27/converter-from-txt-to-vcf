@@ -15,9 +15,22 @@ const LoginForm = () => {
         setSuccess(false);
 
         try {
-            await login(email, password);
+            // Panggil API login dan dapatkan user yang berisi username
+            const user = await login(email, password);
+
+            // Simpan username dan token ke localStorage
+            localStorage.setItem('tokenLoginVCF', 'true'); // Sesuaikan jika token perlu disimpan
+            localStorage.setItem('username', user.username); // Simpan username
+            // Setelah login berhasil
+            const dataUser = {
+                _id: user._id,
+                email: user.email
+            };
+            localStorage.setItem('user', JSON.stringify(dataUser));
+
             setSuccess(true);
-            localStorage.setItem('tokenLoginVCF', 'true');
+
+            // Redirect setelah login berhasil
             setTimeout(() => {
                 navigate('/'); // Redirect ke halaman home atau halaman lain yang diinginkan setelah login
             }, 2000);

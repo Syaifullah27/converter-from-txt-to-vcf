@@ -15,15 +15,18 @@ let snap = new midtransClient.Snap({
 });
 
 app.post('/api/subscribe', async (req, res) => {
-  const { userId, amount } = req.body;
+  const { userId, email, amount } = req.body;
+
+  // Ambil 5 angka pertama dari userId
+  const shortUserId = userId.substring(0, 5);
 
   const parameter = {
     transaction_details: {
-      order_id: `order-${userId}-${Date.now()}`,
+      order_id: `order-${shortUserId}-${Date.now()}`,
       gross_amount: amount,
     },
     customer_details: {
-      email: 'user@example.com',
+      email: email, // Gunakan email yang dikirim dari front-end
     },
   };
 

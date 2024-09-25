@@ -2,11 +2,25 @@ import axios from 'axios';
 
 // eslint-disable-next-line react/prop-types
 const SubscriptionModal = ({ onClose, onSubscribe }) => {
+    // Ambil data user dari localStorage
+    const storedUser = localStorage.getItem('user');
+    const user = storedUser ? JSON.parse(storedUser) : null;
+
+    // Pastikan user ada sebelum mengakses _id dan email
+    const userId = user ? user._id.substring(0, 5) : null;
+    const email = user ? user.email : null;
+
     const handleSubscribe = async () => {
+        if (!userId || !email) {
+            console.error('User belum login atau data user tidak tersedia.');
+            return; // Hentikan eksekusi jika user tidak tersedia
+        }
+
         try {
             const response = await axios.post('http://localhost:5000/api/subscribe', {
-                userId: '123',
-                amount: 10000, // Sesuaikan dengan harga langganan per bulan
+                userId: userId, // Menggunakan 5 digit pertama dari userId
+                email: email,   // Kirim email pengguna yang login
+                amount: 10000,  // Sesuaikan dengan harga langganan per bulan
                 duration: '1 month' // Tambahkan informasi durasi berlangganan
             });
 
@@ -14,21 +28,9 @@ const SubscriptionModal = ({ onClose, onSubscribe }) => {
             console.log(data);
 
             if (data.token) {
-                window.snap.pay(data.token, {
-                    onSuccess: function (result) {
-                        console.log('Payment successful:', result);
-                        onSubscribe(); // Callback untuk menandai sukses berlangganan
-                    },
-                    onPending: function (result) {
-                        console.log('Payment pending:', result);
-                    },
-                    onError: function (result) {
-                        console.error('Payment failed:', result);
-                    },
-                    onClose: function () {
-                        console.log('Payment popup closed');
-                    }
-                });
+                // Buka halaman transaksi di tab baru
+                const transactionUrl = `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.token}`;
+                window.open(transactionUrl, '_blank'); // Membuka halaman di tab baru
             } else {
                 console.error('Token tidak ditemukan di respons API');
             }

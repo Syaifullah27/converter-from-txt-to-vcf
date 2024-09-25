@@ -1,14 +1,16 @@
 /* eslint-disable react/prop-types */
+// Navbar.jsx
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Switch } from '@headlessui/react';
-import { useEffect, useState } from 'react';
 import SubscriptionModal from './SubscribeForm';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate untuk redirect
 
 const Navbar = ({ isDarkMode, setIsDarkMode }) => {
     const [isModalOpen, setModalOpen] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // State untuk mengecek status login
-    const navigate = useNavigate(); // Hook untuk navigasi halaman
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Cek status login
+    const [username, setUsername] = useState(''); // Menyimpan username dari localStorage
+    const navigate = useNavigate();
 
     useEffect(() => {
         const savedMode = localStorage.getItem('darkMode');
@@ -17,10 +19,12 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
             document.documentElement.classList.add('dark');
         }
 
-        // Cek apakah ada token di localStorage
+        // Ambil token dan username dari localStorage
         const token = localStorage.getItem('tokenLoginVCF');
-        if (token) {
+        const storedUsername = localStorage.getItem('username');
+        if (token && storedUsername) {
             setIsLoggedIn(true);
+            setUsername(storedUsername); // Set username ke state
         }
     }, []);
 
@@ -39,24 +43,23 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
         }
     };
 
+    const handleAuthAction = () => {
+        if (isLoggedIn) {
+            // Logout
+            localStorage.removeItem('tokenLoginVCF');
+            localStorage.removeItem('username');
+            setIsLoggedIn(false);
+            setUsername('');
+            navigate('/login');
+        } else {
+            // Login
+            navigate('/login');
+        }
+    };
+
     const handleSubscribe = () => {
         setIsSubscribed(true);
         setModalOpen(false);
-    };
-
-    // Fungsi untuk menangani login/logout
-    const handleAuthAction = () => {
-        if (isLoggedIn) {
-            const cofirmation = window.confirm('Are you sure you want to logout?');
-            if (cofirmation) {
-                // Jika sudah login (ada token), lakukan logout
-                localStorage.removeItem('tokenLoginVCF'); // Hapus token
-                setIsLoggedIn(false); // Ubah status login jadi false
-            }
-        } else {
-            // Jika belum login, arahkan ke halaman login
-            navigate('/login');
-        }
     };
 
     return (
@@ -64,7 +67,9 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
             <div className="flex justify-between items-center px-4">
                 <img src="logo.png" alt="Logo" width={250} />
                 <div className="flex gap-5 justify-center items-center">
-                    {/* Tombol Login/Logout */}
+                    {/* Tampilkan username jika sudah login */}
+                    {isLoggedIn && <span className="text-white font-medium text-xl">{username}</span>}
+
                     <button
                         onClick={handleAuthAction}
                         className="text-white bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded"
