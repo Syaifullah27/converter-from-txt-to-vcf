@@ -1,7 +1,13 @@
+/* eslint-disable react/prop-types */
+// SubscribeForm.jsx
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate untuk redirect
+import { useEffect, useState } from 'react';
 
-// eslint-disable-next-line react/prop-types
 const SubscriptionModal = ({ onClose, onSubscribe }) => {
+    const navigate = useNavigate(); // Buat instance useNavigate
+    const [transactionWindow, setTransactionWindow] = useState(null); // State untuk menyimpan window transaksi
+
     // Ambil data user dari localStorage
     const storedUser = localStorage.getItem('user');
     const user = storedUser ? JSON.parse(storedUser) : null;
@@ -30,7 +36,24 @@ const SubscriptionModal = ({ onClose, onSubscribe }) => {
             if (data.token) {
                 // Buka halaman transaksi di tab baru
                 const transactionUrl = `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.token}`;
-                window.open(transactionUrl, '_blank'); // Membuka halaman di tab baru
+                const newWindow = window.open(transactionUrl, '_blank'); // Membuka halaman di tab baru
+                setTransactionWindow(newWindow);
+
+                // Set interval untuk mengecek status transaksi
+                const checkTransactionStatus = setInterval(async () => {
+                    try {
+                        const statusResponse = await axios.get(`http://localhost:5000/api/transaction-status/${userId}`);
+                        const statusData = statusResponse.data;
+                        if (statusData.status === 'success') {
+                            clearInterval(checkTransactionStatus); // Hentikan interval
+                            if (transactionWindow) transactionWindow.close(); // Tutup tab transaksi
+                            onSubscribe(); // Ubah status menjadi subscribed di Navbar
+                            navigate('/'); // Redirect ke halaman utama
+                        }
+                    } catch (error) {
+                        console.error('Error checking transaction status:', error);
+                    }
+                }, 3000); // Cek setiap 3 detik
             } else {
                 console.error('Token tidak ditemukan di respons API');
             }
@@ -38,6 +61,20 @@ const SubscriptionModal = ({ onClose, onSubscribe }) => {
             console.error('Error:', error);
         }
     };
+
+    // Jika window transaksi sudah ditutup, hentikan interval
+    useEffect(() => {
+        const checkIfWindowClosed = () => {
+            if (transactionWindow && transactionWindow.closed) {
+                clearInterval(checkIfWindowClosed);
+                console.log('Transaksi dibatalkan.');
+            }
+        };
+
+        const checkWindowClosedInterval = setInterval(checkIfWindowClosed, 1000); // Cek setiap 1 detik
+
+        return () => clearInterval(checkWindowClosedInterval);
+    }, [transactionWindow]);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">

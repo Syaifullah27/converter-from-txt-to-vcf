@@ -1,9 +1,10 @@
-/* eslint-disable react/prop-types */
 // Navbar.jsx
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from '@headlessui/react';
 import SubscriptionModal from './SubscribeForm';
+import './subcribeBtn.css';
 
 const Navbar = ({ isDarkMode, setIsDarkMode }) => {
     const [isModalOpen, setModalOpen] = useState(false);
@@ -26,10 +27,20 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
             setIsLoggedIn(true);
             setUsername(storedUsername); // Set username ke state
         }
+
+        // Cek apakah user sudah berlangganan
+        const subscriptionStatus = localStorage.getItem('isSubscribed');
+        if (subscriptionStatus === 'true') {
+            setIsSubscribed(true);
+        }
     }, []);
 
     const toggleModal = () => {
-        setModalOpen(!isModalOpen);
+        if (!isLoggedIn) {
+            navigate('/login'); // Redirect ke halaman login jika belum login
+        } else {
+            setModalOpen(!isModalOpen);
+        }
     };
 
     const toggleDarkMode = () => {
@@ -50,6 +61,7 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
             localStorage.removeItem('username');
             setIsLoggedIn(false);
             setUsername('');
+            setIsSubscribed(false);
             navigate('/login');
         } else {
             // Login
@@ -60,6 +72,7 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
     const handleSubscribe = () => {
         setIsSubscribed(true);
         setModalOpen(false);
+        localStorage.setItem('isSubscribed', 'true');
     };
 
     return (
@@ -79,26 +92,30 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
                     <button
                         onClick={toggleModal}
                         className={`${
-                            isSubscribed ? 'bg-gray-400 italic' : 'bg-blue-500 hover:bg-blue-700'
-                        } text-white font-bold py-2 px-4 rounded`}
+                            isSubscribed ? 'bg-gray-400 italic animate-shine' : 'bg-blue-500 hover:bg-blue-700'
+                        } text-white font-bold py-2 px-4 rounded transition duration-500 ease-in-out`}
                     >
                         {isSubscribed ? 'Premium' : 'Berlangganan'}
                     </button>
-                    {isModalOpen && (
-                        <SubscriptionModal onClose={toggleModal} onSubscribe={handleSubscribe} />
-                    )}
                     <Switch
                         checked={isDarkMode}
                         onChange={toggleDarkMode}
-                        className={`${isDarkMode ? 'bg-blue-600' : 'bg-gray-200'} 
-                            relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none`}
+                        className={`${isDarkMode ? 'bg-blue-600' : 'bg-gray-200'}
+                        relative inline-flex items-center h-6 rounded-full w-11`}
                     >
                         <span
-                            className={`${isDarkMode ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300`}
+                            className={`${isDarkMode ? 'translate-x-6' : 'translate-x-1'}
+                            inline-block w-4 h-4 transform bg-white rounded-full transition-transform`}
                         />
                     </Switch>
                 </div>
             </div>
+            {isModalOpen && (
+                <SubscriptionModal
+                    onClose={() => setModalOpen(false)}
+                    onSubscribe={handleSubscribe}
+                />
+            )}
         </div>
     );
 };
