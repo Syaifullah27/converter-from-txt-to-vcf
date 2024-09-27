@@ -1,59 +1,56 @@
 /* eslint-disable react/prop-types */
 // SubscribeForm.jsx
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate untuk redirect
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 const SubscriptionModal = ({ onClose, onSubscribe }) => {
-    const navigate = useNavigate(); // Buat instance useNavigate
-    const [transactionWindow, setTransactionWindow] = useState(null); // State untuk menyimpan window transaksi
+    const navigate = useNavigate();
+    const [transactionWindow, setTransactionWindow] = useState(null);
 
-    // Ambil data user dari localStorage
     const storedUser = localStorage.getItem('user');
     const user = storedUser ? JSON.parse(storedUser) : null;
 
-    // Pastikan user ada sebelum mengakses _id dan email
     const userId = user ? user._id.substring(0, 5) : null;
     const email = user ? user.email : null;
 
     const handleSubscribe = async () => {
         if (!userId || !email) {
             console.error('User belum login atau data user tidak tersedia.');
-            return; // Hentikan eksekusi jika user tidak tersedia
+            return;
         }
 
         try {
             const response = await axios.post('http://localhost:5000/api/subscribe', {
-                userId: userId, // Menggunakan 5 digit pertama dari userId
-                email: email,   // Kirim email pengguna yang login
-                amount: 10000,  // Sesuaikan dengan harga langganan per bulan
-                duration: '1 month' // Tambahkan informasi durasi berlangganan
+                userId: userId,
+                email: email,
+                amount: 10000,
+                duration: '1 month'
             });
 
             const data = response.data;
-            console.log(data);
 
             if (data.token) {
-                // Buka halaman transaksi di tab baru
                 const transactionUrl = `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.token}`;
-                const newWindow = window.open(transactionUrl, '_blank'); // Membuka halaman di tab baru
+                const newWindow = window.open(transactionUrl, '_blank');
                 setTransactionWindow(newWindow);
 
-                // Set interval untuk mengecek status transaksi
+                // Mulai polling status transaksi
                 const checkTransactionStatus = setInterval(async () => {
                     try {
                         const statusResponse = await axios.get(`http://localhost:5000/api/transaction-status/${userId}`);
                         const statusData = statusResponse.data;
+
                         if (statusData.status === 'success') {
-                            clearInterval(checkTransactionStatus); // Hentikan interval
-                            if (transactionWindow) transactionWindow.close(); // Tutup tab transaksi
-                            onSubscribe(); // Ubah status menjadi subscribed di Navbar
+                            clearInterval(checkTransactionStatus);
+                            if (transactionWindow) transactionWindow.close();
+                            onSubscribe();
                             navigate('/'); // Redirect ke halaman utama
                         }
                     } catch (error) {
                         console.error('Error checking transaction status:', error);
                     }
-                }, 3000); // Cek setiap 3 detik
+                }, 3000);
             } else {
                 console.error('Token tidak ditemukan di respons API');
             }
@@ -62,7 +59,6 @@ const SubscriptionModal = ({ onClose, onSubscribe }) => {
         }
     };
 
-    // Jika window transaksi sudah ditutup, hentikan interval
     useEffect(() => {
         const checkIfWindowClosed = () => {
             if (transactionWindow && transactionWindow.closed) {
@@ -71,7 +67,7 @@ const SubscriptionModal = ({ onClose, onSubscribe }) => {
             }
         };
 
-        const checkWindowClosedInterval = setInterval(checkIfWindowClosed, 1000); // Cek setiap 1 detik
+        const checkWindowClosedInterval = setInterval(checkIfWindowClosed, 1000);
 
         return () => clearInterval(checkWindowClosedInterval);
     }, [transactionWindow]);

@@ -4,6 +4,7 @@ import './App.css';
 import Home from './home';
 import Login from './pages/login';
 import Register from './pages/Register';
+import SuccessPayment from './pages/successPayment';
 
 
 const App = () => {
@@ -15,6 +16,7 @@ const App = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/success" element={<SuccessPayment />} />
     </Routes>
   </Router>
   )
