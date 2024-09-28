@@ -57,12 +57,15 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
     const handleAuthAction = () => {
         if (isLoggedIn) {
             // Logout
-            localStorage.removeItem('tokenLoginVCF');
-            localStorage.removeItem('username');
-            setIsLoggedIn(false);
-            setUsername('');
-            setIsSubscribed(false);
-            navigate('/login');
+            const confirmLogout = window.confirm('Are you sure you want to logout?');
+            if (confirmLogout) {
+                localStorage.removeItem('tokenLoginVCF');
+                localStorage.removeItem('username');
+                setIsLoggedIn(false);
+                setUsername('');
+                setIsSubscribed(false);
+                navigate('/login');
+            }
         } else {
             // Login
             navigate('/login');

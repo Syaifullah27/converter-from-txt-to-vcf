@@ -366,6 +366,7 @@ function AutoDetecKeyword({ isDarkMode }) {
                             <button
                                 className="bg-yellow-500 w-1/2 font-medium text-white py-2 px-4 rounded-md"
                                 onClick={handleConvert}
+                                disabled={fileContent.length === 0}
                             >
                                 Convert
                             </button>
