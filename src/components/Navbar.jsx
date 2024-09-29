@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Switch } from '@headlessui/react';
 import SubscriptionModal from './SubscribeForm';
 import './subcribeBtn.css';
+import Swal from 'sweetalert2';
 
 const Navbar = ({ isDarkMode, setIsDarkMode }) => {
     const [isModalOpen, setModalOpen] = useState(false);
@@ -56,16 +57,35 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
 
     const handleAuthAction = () => {
         if (isLoggedIn) {
-            // Logout
-            const confirmLogout = window.confirm('Are you sure you want to logout?');
-            if (confirmLogout) {
-                localStorage.removeItem('tokenLoginVCF');
-                localStorage.removeItem('username');
-                setIsLoggedIn(false);
-                setUsername('');
-                setIsSubscribed(false);
-                navigate('/login');
-            }
+            // Logout menggunakan SweetAlert
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                width: 600,
+                padding: '3em',
+                color: '#716add',
+                background: '#fff url(/images/trees.png)',
+                backdrop: `
+                    rgba(0, 0, 0, 0.692)
+                    url(/public/nyan-cat-nyan.gif)
+                    left 
+                    no-repeat
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, logout!',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Hapus data dari local storage dan ubah state
+                    localStorage.removeItem('tokenLoginVCF');
+                    localStorage.removeItem('username');
+                    setIsLoggedIn(false);
+                    setUsername('');
+                    setIsSubscribed(false);
+                    
+                    // Arahkan user ke halaman login
+                    navigate('/login');
+                }
+            });
         } else {
             // Login
             navigate('/login');
