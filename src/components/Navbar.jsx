@@ -108,7 +108,7 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
 
                     <button
                         onClick={handleAuthAction}
-                        className="text-white bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded"
+                        className="text-white rounded-2xl bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 "
                     >
                         {isLoggedIn ? 'Logout' : 'Login'}
                     </button>
@@ -116,7 +116,7 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
                         onClick={toggleModal}
                         className={`${
                             isSubscribed ? 'bg-gray-400 italic animate-shine' : 'bg-blue-500 hover:bg-blue-700'
-                        } text-white font-bold py-2 px-4 rounded transition duration-500 ease-in-out`}
+                        } rounded-2xl text-white font-bold py-2 px-4 transition duration-500 ease-in-out`}
                     >
                         {isSubscribed ? 'Premium' : 'Berlangganan'}
                     </button>
