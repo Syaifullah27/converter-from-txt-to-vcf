@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+// server.js
 const express = require('express');
 const cors = require('cors');
 const midtransClient = require('midtrans-client');
@@ -17,7 +17,6 @@ let snap = new midtransClient.Snap({
 app.post('/api/subscribe', async (req, res) => {
   const { userId, email, amount } = req.body;
 
-  // Ambil 5 angka pertama dari userId
   const shortUserId = userId.substring(0, 5);
 
   const parameter = {
@@ -26,8 +25,11 @@ app.post('/api/subscribe', async (req, res) => {
       gross_amount: amount,
     },
     customer_details: {
-      email: email, // Gunakan email yang dikirim dari front-end
+      email: email,
     },
+    callbacks: {
+      finish_redirect_url: 'http://localhost:3000/success' // Tambahkan redirect ke /success setelah pembayaran
+    }
   };
 
   try {
